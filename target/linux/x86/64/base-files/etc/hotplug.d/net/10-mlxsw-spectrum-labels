@@ -1,0 +1,6 @@
+#!/bin/sh
+
+if [[ "$ACTION" = "add" && "$DEVICEDRIVER" = "mlxsw_spectrum*" ]]; then
+	read -r label < "/sys/class/net/$DEVICENAME/phys_port_name"
+	ip link set "$DEVICENAME" name "sw$label"
+fi
