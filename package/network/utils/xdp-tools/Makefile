@@ -11,6 +11,7 @@ PKG_ABI_VERSION:=$(call abi_version_str,$(PKG_VERSION))
 
 PKG_MAINTAINER:=Daniel Golle <daniel@makrotopia.org>
 
+PKG_BUILD_DEPENDS:=bpftool/host
 PKG_FLAGS:=nonshared
 
 include $(INCLUDE_DIR)/package.mk
@@ -42,6 +43,21 @@ define Package/xdp-tools/Default
   DEPENDS:=+libxdp
 endef
 
+
+define Package/xdp-bench
+$(call Package/xdp-tools/Default)
+  TITLE:=xdp-bench - an XDP benchmarking tool
+  DEPENDS+=@KERNEL_DEBUG_INFO_BTF
+endef
+
+define Package/xdp-bench/description
+XDP-bench is a benchmarking utility for exercising the different operation modes
+of XDP. It is intended to be a simple program demonstrating the various operating
+modes; these include dropping packets, hairpin forwarding (using the XDP_TX return
+code), and redirection using the various in-kernel packet redirection facilities.
+endef
+
+
 define Package/xdp-filter
 $(call Package/xdp-tools/Default)
   TITLE:=xdp-filter - a simple XDP-powered packet filter
@@ -66,6 +82,38 @@ multiple programs to the same interface. To achieve this it exposes the same
 load and unload semantics exposed by the libxdp library.
 endef
 
+
+define Package/xdp-monitor
+$(call Package/xdp-tools/Default)
+  TITLE:=xdp-monitor - a simple XDP tracepoint monitoring tool
+  DEPENDS+=@KERNEL_DEBUG_INFO_BTF
+endef
+
+define Package/xdp-monitor/description
+XDP-monitor is a tool that monitors various XDP related statistics and
+events using BPF tracepoints infrastructure, trying to be as low overhead
+as possible.
+endef
+
+
+define Package/xdp-trafficgen
+$(call Package/xdp-tools/Default)
+  TITLE:=xdp-trafficgen - an XDP-based packet generator
+  DEPENDS+=@KERNEL_DEBUG_INFO_BTF
+endef
+
+define Package/xdp-trafficgen/description
+XDP-trafficgen is a packet generator utilising the XDP kernel subsystem
+to generate packets transmit them through a network interface.
+Packets are dynamically generated and transmitted in the kernel,
+allowing for high performance (millions of packets per second per core).
+
+XDP-trafficgen supports generating UDP traffic with fixed or dynamic
+destination ports, and also has basic support for generating dummy
+TCP traffic on a single flow.
+endef
+
+
 define Package/xdpdump
 $(call Package/xdp-tools/Default)
   TITLE:=xdpdump - tool for capturing packets at the XDP layer
@@ -75,6 +123,7 @@ endef
 define Package/xdpdump/description
 xdpdump - a simple tcpdump like tool for capturing packets at the XDP layer
 endef
+
 
 TARGET_LDFLAGS += $(INTL_LDFLAGS)
 
@@ -87,7 +136,7 @@ CONFIGURE_VARS += \
 	BPF_TARGET="$(BPF_TARGET)" \
 	LLC="$(LLVM_LLC)" \
 	BPF_LDFLAGS="-march=$(BPF_TARGET) -mcpu=v3" \
-	BPFTOOL=""
+	BPFTOOL="$(STAGING_DIR_HOST)/usr/sbin/bpftool"
 
 ifneq ($(findstring s,$(OPENWRT_VERBOSE)),)
 	MAKE_FLAGS+=V=1
@@ -119,6 +168,11 @@ define Build/InstallDev
 		$(1)/usr/lib/pkgconfig/libxdp.pc
 endef
 
+define Package/xdp-bench/install
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/xdp-bench $(1)/usr/sbin
+endef
+
 define Package/xdp-filter/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/xdp-filter $(1)/usr/sbin
@@ -127,6 +181,16 @@ endef
 define Package/xdp-loader/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/xdp-loader $(1)/usr/sbin
+endef
+
+define Package/xdp-monitor/install
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/xdp-monitor $(1)/usr/sbin
+endef
+
+define Package/xdp-trafficgen/install
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/xdp-trafficgen $(1)/usr/sbin
 endef
 
 define Package/xdpdump/install
@@ -141,6 +205,9 @@ define Package/libxdp/install
 endef
 
 $(eval $(call BuildPackage,libxdp))
+$(eval $(call BuildPackage,xdp-bench))
 $(eval $(call BuildPackage,xdp-filter))
 $(eval $(call BuildPackage,xdp-loader))
+$(eval $(call BuildPackage,xdp-monitor))
+$(eval $(call BuildPackage,xdp-trafficgen))
 $(eval $(call BuildPackage,xdpdump))
