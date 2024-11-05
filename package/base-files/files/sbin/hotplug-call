@@ -11,6 +11,11 @@ USER=root
 export PATH LOGNAME USER
 export DEVICENAME="${DEVPATH##*/}"
 
+if [ "$HOTPLUG_TYPE" = "net" ]; then
+	DRIVERPATH="$(readlink /sys$DEVPATH/device/driver)"
+	export DEVICEDRIVER="${DRIVERPATH##*/}"
+fi
+
 if [ \! -z "$1" -a -d /etc/hotplug.d/$1 ]; then
 	for script in $(ls /etc/hotplug.d/$1/* 2>&-); do (
 		[ -f $script ] && . $script
