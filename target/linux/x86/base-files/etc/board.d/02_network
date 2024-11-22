@@ -97,6 +97,16 @@ sophos-sg-135r3|sophos-xg-135r3| \
 sophos-sg-135wr3|sophos-xg-135wr3)
 	ucidef_set_interfaces_lan_wan "eth0 eth1 eth2 eth3 eth5 eth7 eth8" "eth6"
 	;;
+supermicro-sys-e302-9d)
+	ucidef_set_network_device_path "eth0" "pci0000:64/0000:64:03.0/0000:66:00.0"
+	ucidef_set_network_device_path "eth1" "pci0000:64/0000:64:03.0/0000:66:00.1"
+	ucidef_set_network_device_path "eth2" "pci0000:64/0000:64:03.0/0000:66:00.2"
+	ucidef_set_network_device_path "eth3" "pci0000:64/0000:64:03.0/0000:66:00.3"
+	ucidef_set_network_device_path "eth4" "pci0000:b2/0000:b2:00.0/0000:b3:00.0/0000:b4:03.0/0000:b5:00.0"
+	ucidef_set_network_device_path "eth5" "pci0000:b2/0000:b2:00.0/0000:b3:00.0/0000:b4:03.0/0000:b5:00.1"
+	ucidef_set_network_device_path "eth6" "pci0000:b2/0000:b2:00.0/0000:b3:00.0/0000:b4:03.0/0000:b5:00.2"
+	ucidef_set_network_device_path "eth7" "pci0000:b2/0000:b2:00.0/0000:b3:00.0/0000:b4:03.0/0000:b5:00.3"
+	;;
 traverse-technologies-geos)
 	ucidef_set_interface_lan "eth0 eth1"
 	ucidef_add_atm_bridge "0" "35" "llc" "bridged"
